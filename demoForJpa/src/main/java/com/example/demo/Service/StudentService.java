@@ -2,6 +2,7 @@ package com.example.demo.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,53 +29,57 @@ public class StudentService {
 		}
 		
 		
-		public ResponseEntity<List<Student>> getStudents(String sortBy, String orderBy) 
+		public Map<String, List<Student>> getStudents(String sortBy, String orderBy) 
 		{
 			List<Student> students=studentRepo.findAll();
-			List<Student> sortedStudents=null;
+			Map<String, List<Student>> sortedStudents=null;
 			if(orderBy.equalsIgnoreCase("ascending"))
 			{
 	        if (sortBy.equalsIgnoreCase("name")) {
 	            sortedStudents = students.stream()
 	                    .sorted(Comparator.comparing(student -> student.getStudentName()))
-	                    .collect(Collectors.toList());
+	                    .collect(Collectors.groupingBy(Student::getClassId));
 	        } else if(sortBy.equalsIgnoreCase("id"))
 	            sortedStudents = students.stream()
 	                    .sorted(Comparator.comparing(student -> student.getId()))
-	                    .collect(Collectors.toList());
+	                    .collect(Collectors.groupingBy(Student::getClassId));
 	        
 		else
 	        {
 	        	sortedStudents = students.stream()
 	                    .sorted(Comparator.comparing(student -> student.getStudentEmail()))
-	                    .collect(Collectors.toList());
+	                    .collect(Collectors.groupingBy(Student::getClassId));
 	        }
 			}
-	        
-	    
+	        	    
 		else if(orderBy.equalsIgnoreCase("descending"))
 		{
 			if (sortBy.equalsIgnoreCase("name")) {
 	            sortedStudents = students.stream()
 	                    .sorted(Comparator.comparing(student -> ((Student) student).getStudentName()).reversed())
-	                    .collect(Collectors.toList());
+	                    .collect(Collectors.groupingBy(Student::getClassId));
 	        } else if(sortBy.equalsIgnoreCase("id"))
 	            sortedStudents = students.stream()
 	                    .sorted(Comparator.comparing(student -> ((Student) student).getId()).reversed())
-	                    .collect(Collectors.toList());
+	                    .collect(Collectors.groupingBy(Student::getClassId));
 	        
 		else
 	        {
 	        	sortedStudents = students.stream()
 	                    .sorted(Comparator.comparing(student -> ((Student) student).getStudentEmail()).reversed())
-	                    .collect(Collectors.toList());
+	                    .collect(Collectors.groupingBy(Student::getClassId));
 	        }
 		}
 			
-		return ResponseEntity.ok(sortedStudents);
+		return (sortedStudents);
 		}	
-			//return new ResponseEntity<>(studentRepo.findAll(),HttpStatus.OK);
+			
+		//to get all students based on class Id
 		
+		
+		public List<Student> getStudentsByClassId(String classId) {
+	        return studentRepo.findByClassId(classId);
+		}
 		
 		
 		public ResponseEntity<Student> getStudent(@PathVariable long id) 
@@ -99,6 +104,7 @@ public class StudentService {
 				student.get().setStudentName(stud.getStudentName());
 				student.get().setStudentEmail(stud.getStudentEmail());
 				student.get().setStudentAddress(stud.getStudentAddress());
+				student.get().setClassId(stud.getClassId());
 				return new ResponseEntity<>(studentRepo.save(student.get()),HttpStatus.OK);
 			}
 			else

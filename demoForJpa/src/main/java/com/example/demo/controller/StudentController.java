@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +32,16 @@ public class StudentController {
 	}
 	
 	@GetMapping("/api/students")
-	public ResponseEntity<List<Student>> getStudents(@RequestHeader(value = "SortBy", defaultValue = "name") String sortBy, 
+	public Map<String, List<Student>> getStudents(@RequestHeader(value = "SortBy", defaultValue = "name") String sortBy, 
 			@RequestHeader(value = "OrderBy", defaultValue = "ascending") String orderBy) 
 	{
 		return studentService.getStudents(sortBy,orderBy);
 			
+	}
+	//to get sorted students based on classId
+	@GetMapping("/api/students/class/{classId}")
+    public List<Student> getStudentsByClassId(@PathVariable String classId) {
+        return studentService.getStudentsByClassId(classId);
 	}
 	
 	@GetMapping("/api/students/{id}")
